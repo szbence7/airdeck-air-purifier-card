@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="300" viewBox="0 0 460 300" role="img" aria-label="AirDeck light preview">
+  <rect x="1" y="1" width="458" height="298" rx="22" fill="#ffffff" stroke="#d5dfe6"/>
+  <g font-family="system-ui, sans-serif" fill="#253442">
+    <circle cx="42" cy="41" r="22" fill="#167858" fill-opacity=".16"/>
+    <g fill="none" stroke="#167858" stroke-width="2" stroke-linecap="round">
+      <rect x="34" y="29" width="16" height="24" rx="4"/><path d="M37 39h10m-10 4h10m-10 4h10"/>
+    </g>
+    <text x="76" y="36" font-weight="650" font-size="18">Living room purifier</text>
+    <text x="76" y="55" fill="#556779" font-size="13">On · Auto · 33%</text>
+    <rect x="392" y="19" width="46" height="44" rx="13" fill="#167858" fill-opacity=".16"/>
+    <path d="M415 30v8m-5-5a8 8 0 1 0 10 0" fill="none" stroke="#167858" stroke-width="2" stroke-linecap="round"/>
+    <text x="20" y="83" fill="#556779" font-size="13">Speed</text>
+    <g fill="#eef3f6"><rect x="20" y="90" width="135" height="31" rx="10"/><rect x="162" y="90" width="135" height="31" rx="10"/><rect x="304" y="90" width="135" height="31" rx="10"/></g>
+    <g text-anchor="middle" font-size="14"><text x="87" y="111">1</text><text x="229" y="111">2</text><text x="371" y="111">3</text></g>
+    <text x="20" y="143" fill="#556779" font-size="13">Mode</text>
+    <rect x="20" y="150" width="205" height="31" rx="10" fill="#167858" fill-opacity=".16"/>
+    <rect x="234" y="150" width="205" height="31" rx="10" fill="#eef3f6"/>
+    <g text-anchor="middle" font-size="14"><text x="123" y="171" fill="#167858">Auto</text><text x="337" y="171">Sleep</text></g>
+    <g fill="#eef3f6"><rect x="20" y="192" width="205" height="57" rx="12"/><rect x="234" y="192" width="205" height="57" rx="12"/><rect x="20" y="259" width="205" height="29" rx="10"/><rect x="234" y="259" width="205" height="29" rx="10"/></g>
+    <g fill="#556779" font-size="13"><text x="32" y="213">PM2.5</text><text x="246" y="213">Filter</text></g>
+    <g font-size="17" font-weight="650"><text x="32" y="236">12 µg/m³</text><text x="246" y="236">78%</text></g>
+    <g text-anchor="middle" font-size="13"><text x="122" y="278">Ioniser</text><text x="336" y="278">UV sterilisation</text></g>
+  </g>
+</svg>
