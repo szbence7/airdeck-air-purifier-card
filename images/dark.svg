@@ -1,24 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="460" height="300" viewBox="0 0 460 300" role="img" aria-label="AirDeck dark preview">
-  <rect x="1" y="1" width="458" height="298" rx="22" fill="#192029" stroke="#435163"/>
-  <g font-family="system-ui, sans-serif" fill="#f2f5f8">
-    <circle cx="42" cy="41" r="22" fill="#83dfbc" fill-opacity=".16"/>
-    <g fill="none" stroke="#83dfbc" stroke-width="2" stroke-linecap="round">
-      <rect x="34" y="29" width="16" height="24" rx="4"/><path d="M37 39h10m-10 4h10m-10 4h10"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="243" viewBox="0 0 500 243" role="img" aria-label="AirDeck in dark mode">
+  <defs>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter>
+    <path id="fan" d="M0-4C-13-8-7-17 0-13c4 2 4 6 2 9 10-9 17 1 11 6-3 3-7 1-9-2 3 13-9 16-12 9-2-4 1-7 5-8Z"/>
+    <path id="power" d="M0-11v10m-6-6a10 10 0 1 0 12 0"/>
+    <path id="tube" d="m-9 6 15-15 4 4-15 15zm-1 1-2 2m19-19 2-2"/>
+  </defs>
+  <rect x="1" y="1" width="498" height="241" rx="18" fill="#192029" stroke="#435163"/>
+  <g font-family="system-ui,sans-serif" fill="#f2f5f8">
+    <circle cx="27" cy="27" r="19" fill="#4caf50" fill-opacity=".16"/>
+    <use href="#fan" transform="translate(27 27) scale(.7)" fill="#4caf50"/>
+    <text x="56" y="25" font-size="15" font-weight="650">Air Purifier</text>
+    <text x="56" y="43" font-size="13" fill="#aebdca">On · Speed 1 · Filter 59% · Display Off</text>
+    <rect x="12" y="63" width="476" height="42" rx="21" fill="#293440"/>
+    <g stroke="#f44336" fill="none" stroke-width="2.3" stroke-linecap="round" transform="translate(49 84)">
+      <use href="#power" filter="url(#glow)"/><use href="#power"/>
     </g>
-    <text x="76" y="36" font-weight="650" font-size="18">Living room purifier</text>
-    <text x="76" y="55" fill="#aebdca" font-size="13">On · Auto · 33%</text>
-    <rect x="392" y="19" width="46" height="44" rx="13" fill="#83dfbc" fill-opacity=".16"/>
-    <path d="M415 30v8m-5-5a8 8 0 1 0 10 0" fill="none" stroke="#83dfbc" stroke-width="2" stroke-linecap="round"/>
-    <text x="20" y="83" fill="#aebdca" font-size="13">Speed</text>
-    <g fill="#293440"><rect x="20" y="90" width="135" height="31" rx="10"/><rect x="162" y="90" width="135" height="31" rx="10"/><rect x="304" y="90" width="135" height="31" rx="10"/></g>
-    <g text-anchor="middle" font-size="14"><text x="87" y="111">1</text><text x="229" y="111">2</text><text x="371" y="111">3</text></g>
-    <text x="20" y="143" fill="#aebdca" font-size="13">Mode</text>
-    <rect x="20" y="150" width="205" height="31" rx="10" fill="#83dfbc" fill-opacity=".16"/>
-    <rect x="234" y="150" width="205" height="31" rx="10" fill="#293440"/>
-    <g text-anchor="middle" font-size="14"><text x="123" y="171" fill="#83dfbc">Auto</text><text x="337" y="171">Sleep</text></g>
-    <g fill="#293440"><rect x="20" y="192" width="205" height="57" rx="12"/><rect x="234" y="192" width="205" height="57" rx="12"/><rect x="20" y="259" width="205" height="29" rx="10"/><rect x="234" y="259" width="205" height="29" rx="10"/></g>
-    <g fill="#aebdca" font-size="13"><text x="32" y="213">PM2.5</text><text x="246" y="213">Filter</text></g>
-    <g font-size="17" font-weight="650"><text x="32" y="236">12 µg/m³</text><text x="246" y="236">78%</text></g>
-    <g text-anchor="middle" font-size="13"><text x="122" y="278">Ioniser</text><text x="336" y="278">UV sterilisation</text></g>
+    <use href="#fan" transform="translate(124 84) scale(.58)" fill="#aebdca"/>
+    <text x="133" y="89" fill="#aebdca" font-size="11">A</text>
+    <g font-size="13" font-weight="650">
+      <use href="#fan" transform="translate(204 84) scale(.58)" fill="#4caf50"/><text x="214" y="89" fill="#4caf50">1</text>
+      <use href="#fan" transform="translate(283 84) scale(.58)" fill="#aebdca"/><text x="293" y="89" fill="#aebdca">2</text>
+      <use href="#fan" transform="translate(361 84) scale(.58)" fill="#aebdca"/><text x="371" y="89" fill="#aebdca">3</text>
+      <text x="443" y="90" fill="#aebdca">Zz</text>
+    </g>
+    <g fill="#293440"><rect x="12" y="113" width="234" height="55" rx="14"/><rect x="254" y="113" width="234" height="55" rx="14"/>
+      <rect x="12" y="176" width="234" height="55" rx="14"/><rect x="254" y="176" width="234" height="55" rx="14"/></g>
+    <g fill="#4caf50" fill-opacity=".16"><circle cx="40" cy="140" r="19"/><circle cx="282" cy="140" r="19"/></g>
+    <g fill="none" stroke="#4caf50" stroke-width="2" stroke-linecap="round">
+      <path d="M31 134h18m-18 6h18m-18 6h18m-15-15v18m6-18v18m6-18v18"/>
+      <path d="M277 135h.1m5 0h.1m5 0h.1m-10 5h.1m5 0h.1m5 0h.1m-10 5h.1m5 0h.1m5 0h.1"/>
+    </g>
+    <circle cx="40" cy="203" r="19" fill="#2196f3" fill-opacity=".2"/>
+    <path d="m40 192 2.5 8.5 8.5 2.5-8.5 2.5-2.5 8.5-2.5-8.5L29 203l8.5-2.5Z" fill="#2196f3"/>
+    <circle cx="282" cy="203" r="19" fill="#536dfe" fill-opacity=".2"/>
+    <g transform="translate(282 203)" stroke="#536dfe" fill="none" stroke-width="2"><use href="#tube" filter="url(#glow)"/><use href="#tube"/></g>
+    <g font-size="14" font-weight="650"><text x="69" y="137">Air Quality</text><text x="311" y="137">PM2.5</text><text x="69" y="200">Ioniser</text><text x="311" y="200">UV Sterilisation</text></g>
+    <g font-size="13" fill="#aebdca"><text x="69" y="153">Excellent</text><text x="311" y="153">5 µg/m³</text><text x="69" y="216">On</text><text x="311" y="216">On</text></g>
   </g>
 </svg>
