@@ -47,3 +47,11 @@ Once the card sees the purifier turn on, it can show the PM2.5 change for that r
 ## What’s new
 
 See the [changelog](CHANGELOG.md) and [GitHub releases](https://github.com/szbence7/airdeck-air-purifier-card/releases).
+
+Icon artwork is by [Pictogrammers](https://pictogrammers.com/library/mdi/), licensed under [Apache 2.0](LICENSE-MDI).
+
+## Support
+
+If AirDeck makes your dashboard more useful, you can buy me a coffee. Thank you!
+
+[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/benceix)
