@@ -2,6 +2,14 @@
 
 Write a “What’s new” section in British English for every release.
 
+## 1.1.0
+
+### What’s new
+
+- Use a compact icon strip for power, fan speeds and operating modes. The fan spins while the purifier runs, and the active power button glows red.
+- Show optional air-quality and PM2.5 tiles, with filter and device display status in the header.
+- Highlight active UV sterilisation in ultraviolet blue and the ioniser in blue. Named speed presets use dedicated fan-speed icons.
+
 ## 1.0.0
 
 ### What’s new
