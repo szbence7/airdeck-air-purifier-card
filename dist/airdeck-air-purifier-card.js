@@ -273,8 +273,9 @@ class AirDeckCard extends HTMLElement {
       ? attrs.preset_modes.filter(value => typeof value === 'string' && value.trim()) : [];
     const manual = presets.filter(preset => namedSpeeds.includes(preset.toLowerCase()))
       .sort((a, b) => namedSpeeds.indexOf(a.toLowerCase()) - namedSpeeds.indexOf(b.toLowerCase()));
+    const useNamedSpeeds = manual.length > 0 && (!(supported & features.speed) || manual.length === namedSpeeds.length);
     const automatic = presets.filter(preset => ['auto', 'automatic', 'smart'].includes(preset.toLowerCase()));
-    const other = presets.filter(preset => !manual.includes(preset) && !automatic.includes(preset));
+    const other = presets.filter(preset => (!useNamedSpeeds || !manual.includes(preset)) && !automatic.includes(preset));
     const appendPreset = preset => {
       const key = preset.toLowerCase();
       const index = namedSpeeds.indexOf(key) + 1;
@@ -289,7 +290,7 @@ class AirDeckCard extends HTMLElement {
     if (config.show_presets !== false) automatic.forEach(appendPreset);
     let slider;
     if (config.show_speed !== false) {
-      if (manual.length) {
+      if (useNamedSpeeds) {
         manual.forEach(appendPreset);
       } else if (supported & features.speed) {
         if (speeds.count <= 5) {
