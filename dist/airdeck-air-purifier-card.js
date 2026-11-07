@@ -98,6 +98,8 @@ class AirDeckCard extends HTMLElement {
         .power[aria-pressed="true"] { color:#f44336; }
         .power[aria-pressed="true"] ha-icon { filter:drop-shadow(0 0 5px #f44336); }
         .speed-label { display:flex; align-items:center; gap:2px; font-size:.75rem; }
+        .mode-caption { max-width:100%; padding:0 3px; overflow:hidden; text-overflow:ellipsis;
+          white-space:nowrap; font-size:.65rem; }
         .slider { margin:0 12px; min-height:42px; padding:0 10px; border-radius:22px; background:var(--airdeck-surface); }
         .slider input { flex:1; min-width:0; accent-color:#4caf50; }
         .tiles { grid-template-columns:repeat(auto-fit,minmax(min(118px,100%),1fr)); }
@@ -276,9 +278,11 @@ class AirDeckCard extends HTMLElement {
     const appendPreset = preset => {
       const key = preset.toLowerCase();
       const index = namedSpeeds.indexOf(key) + 1;
-      const button = this.iconButton(index ? `Speed ${index}` : modeLabel(preset),
-        index ? `mdi:fan-speed-${index}` : presetIcons.get(key) ?? 'mdi:tune-variant',
+      const knownIcon = index ? `mdi:fan-speed-${index}` : presetIcons.get(key);
+      const label = index ? `Speed ${index}` : modeLabel(preset);
+      const button = this.iconButton(label, knownIcon ?? 'mdi:tune-variant',
         () => runFan('set_preset_mode', { preset_mode: preset }), on && attrs.preset_mode === preset, !usable);
+      if (!knownIcon) button.append(element('span', 'mode-caption', label));
       button.dataset.focusKey = `preset-${presets.indexOf(preset)}`;
       strip.append(button);
     };
