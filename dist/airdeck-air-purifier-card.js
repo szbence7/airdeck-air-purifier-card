@@ -8,9 +8,12 @@ const fields = [
   { key: 'show_speed', label: 'Show speed controls' },
   { key: 'show_presets', label: 'Show operating modes' },
   { key: 'show_air_quality', label: 'Show air quality' },
+  { key: 'air_quality_entity', label: 'Air quality sensor', domain: 'sensor', toggle: 'show_air_quality' },
   { key: 'pm25_entity', label: 'PM2.5 sensor', domain: 'sensor', toggle: 'show_air_quality' },
   { key: 'show_filter', label: 'Show filter status' },
   { key: 'filter_entity', label: 'Filter sensor', domain: 'sensor', toggle: 'show_filter' },
+  { key: 'show_display', label: 'Show device display status' },
+  { key: 'display_entity', label: 'Device display', domain: ['light', 'switch'], toggle: 'show_display' },
   { key: 'show_ioniser', label: 'Show ioniser control' },
   { key: 'ioniser_entity', label: 'Ioniser switch or script', domain: ['switch', 'script'], toggle: 'show_ioniser' },
   { key: 'show_uv', label: 'Show UV control' },
@@ -19,8 +22,21 @@ const fields = [
 
 const extraControls = [
   { key: 'ioniser', label: 'Ioniser', icon: 'mdi:creation' },
-  { key: 'uv', label: 'UV sterilisation', icon: 'mdi:lightbulb-on-outline' },
+  { key: 'uv', label: 'UV Sterilisation', icon: 'mdi:lightbulb-fluorescent-tube' },
 ];
+
+const namedSpeeds = ['low', 'medium', 'high'];
+const presetIcons = new Map([
+  ['auto', 'mdi:fan-auto'], ['automatic', 'mdi:fan-auto'], ['smart', 'mdi:fan-auto'],
+  ['sleep', 'mdi:sleep'], ['night', 'mdi:weather-night'], ['quiet', 'mdi:volume-low'],
+  ['silent', 'mdi:volume-off'], ['turbo', 'mdi:weather-windy'], ['boost', 'mdi:rocket-launch-outline'],
+  ['eco', 'mdi:leaf'], ['breeze', 'mdi:weather-windy'], ['favourite', 'mdi:star-outline'],
+  ['favorite', 'mdi:star-outline'], ['manual', 'mdi:tune-variant'],
+]);
+
+function modeLabel(mode) {
+  return mode.replaceAll('_', ' ').replace(/^./, first => first.toUpperCase());
+}
 
 const available = entity => !!entity && !['unavailable', 'unknown'].includes(entity.state);
 
@@ -52,31 +68,46 @@ class AirDeckCard extends HTMLElement {
       <style>
         :host { display:block; }
         ha-card { display:block; overflow:hidden; color:var(--primary-text-color,#252b36); }
-        .panel { display:grid; gap:12px; padding:14px; }
-        .header,.option,.slider { display:flex; align-items:center; gap:10px; }
-        .header { min-width:0; }
-        .title { flex:1; min-width:0; }
-        .title strong,.title small,.metric strong,.metric small { display:block; overflow-wrap:anywhere; }
-        .title strong { font-size:1rem; }
-        small,.label { color:var(--secondary-text-color,#545c69); font-size:.82rem; }
-        .badge { display:grid; place-items:center; width:42px; height:42px; flex:none; border-radius:50%;
-          color:var(--success-color,#25866b); background:color-mix(in srgb,currentColor 15%,transparent); }
-        button { min-height:38px; border:1px solid transparent; border-radius:12px; padding:5px 11px;
-          font:inherit; font-size:.86rem; color:inherit; background:var(--secondary-background-color,#ecf1f4); cursor:pointer; }
-        button:hover:not(:disabled) { border-color:var(--primary-color,#25866b); }
+        .panel { display:grid; gap:8px; padding:0 0 12px; container-type:inline-size;
+          --airdeck-muted:var(--secondary-text-color,#757575);
+          --airdeck-surface:color-mix(in srgb,var(--primary-text-color,#252b36) 7%,transparent); }
+        .header,.tile,.slider { display:flex; align-items:center; gap:10px; min-width:0; }
+        .header { min-height:55px; padding:0 8px; }
+        .title,.tile-copy { flex:1; min-width:0; }
+        .title strong,.title small,.tile-copy strong,.tile-copy small { display:block; overflow-wrap:anywhere; }
+        .title strong,.tile-copy strong { font-size:.92rem; font-weight:600; }
+        small { color:var(--airdeck-muted); font-size:.81rem; }
+        .badge,.tile-icon { display:grid; place-items:center; width:38px; height:38px; flex:none;
+          border-radius:50%; color:var(--airdeck-muted);
+          background:color-mix(in srgb,currentColor 14%,transparent); }
+        .badge.running { color:#4caf50; }
+        .badge.running ha-icon { animation:spin var(--airdeck-spin,1.6s) linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        @media (prefers-reduced-motion:reduce) { .badge.running ha-icon { animation:none; } }
+        button { border:0; font:inherit; color:inherit; cursor:pointer; }
         button:focus-visible,input:focus-visible { outline:2px solid var(--primary-color,#25866b); outline-offset:2px; }
-        button[aria-pressed="true"] { color:var(--success-color,#25866b);
-          background:color-mix(in srgb,currentColor 16%,transparent); }
         button:disabled,input:disabled { opacity:.45; cursor:default; }
-        .power { display:grid; place-items:center; min-width:44px; min-height:44px; }
-        .group { display:grid; gap:5px; }
-        .row { display:flex; flex-wrap:wrap; gap:6px; }
-        .row button { flex:1 0 auto; }
-        .slider input { flex:1; min-width:0; accent-color:var(--success-color,#25866b); }
-        .metrics,.extras { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(120px,100%),1fr)); gap:7px; }
-        .metric,.option { padding:9px 11px; border-radius:12px; background:var(--secondary-background-color,#ecf1f4); }
-        .metric strong { font-variant-numeric:tabular-nums; }
-        .option { justify-content:space-between; text-align:start; }
+        .strip,.tiles { display:grid; gap:8px; margin:0 12px; }
+        .strip { grid-template-columns:repeat(auto-fit,minmax(min(34px,100%),1fr));
+          column-gap:6px; background:var(--airdeck-surface); border-radius:22px; }
+        .control { min-width:0; min-height:42px; display:grid; place-items:center; border-radius:12px;
+          color:var(--airdeck-muted); background:transparent; }
+        .control:hover:not(:disabled),.tile:hover:not(:disabled) {
+          background:color-mix(in srgb,var(--primary-text-color,#252b36) 12%,transparent); }
+        .control[aria-pressed="true"] { color:#4caf50; }
+        .power[aria-pressed="true"] { color:#f44336; }
+        .power[aria-pressed="true"] ha-icon { filter:drop-shadow(0 0 5px #f44336); }
+        .speed-label { display:flex; align-items:center; gap:2px; font-size:.75rem; }
+        .slider { margin:0 12px; min-height:42px; padding:0 10px; border-radius:22px; background:var(--airdeck-surface); }
+        .slider input { flex:1; min-width:0; accent-color:#4caf50; }
+        .tiles { grid-template-columns:repeat(auto-fit,minmax(min(118px,100%),1fr)); }
+        .tile { box-sizing:border-box; min-height:55px; padding:7px 9px; border-radius:14px;
+          background:var(--airdeck-surface); text-align:start; }
+        .metric .tile-icon { color:#4caf50; }
+        .ioniser[aria-pressed="true"] .tile-icon { color:#2196f3; }
+        .uv[aria-pressed="true"] .tile-icon { color:#536dfe; }
+        .ioniser[aria-pressed="true"] ha-icon,.uv[aria-pressed="true"] ha-icon {
+          filter:drop-shadow(0 0 5px currentColor); }
         .error { color:var(--error-color,#b3261e); font-size:.85rem; }
       </style>
       <ha-card><div class="panel"></div></ha-card>`;
@@ -99,6 +130,8 @@ class AirDeckCard extends HTMLElement {
       computeLabel: field => fields.find(item => item.key === field.name)?.label,
       computeHelper: field => ({
         entity: 'Choose the fan entity for your air purifier. AirDeck uses its available speeds and modes.',
+        air_quality_entity: 'Optional. Select a sensor that reports an air quality label.',
+        display_entity: 'Optional. Show whether the purifier display is on or off.',
         pm25_entity: 'Optional. Select a particulate matter sensor.',
         filter_entity: 'Optional. Select a filter life or replacement sensor.',
         ioniser_entity: 'Optional. Use a switch to show its state, or a script to run an action.',
@@ -135,12 +168,22 @@ class AirDeckCard extends HTMLElement {
     return button;
   }
 
-  section(label, children) {
-    const group = element('div', 'group');
-    const row = element('div', 'row');
-    row.append(...children);
-    group.append(element('span', 'label', label), row);
-    return group;
+  iconButton(label, iconName, action, pressed, disabled) {
+    const button = this.button('', action, pressed, disabled);
+    button.className = 'control';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    button.append(icon(iconName));
+    return button;
+  }
+
+  tile(label, value, iconName, button = element('div')) {
+    const badge = element('span', 'tile-icon');
+    badge.append(icon(iconName));
+    const copy = element('div', 'tile-copy');
+    copy.append(element('strong', '', label), element('small', '', value));
+    button.append(badge, copy);
+    return button;
   }
 
   async run(domain, action, entityId, values) {
@@ -164,10 +207,12 @@ class AirDeckCard extends HTMLElement {
     const config = this.config;
     const fan = states[config.entity];
     const pm25 = states[config.pm25_entity];
+    const quality = states[config.air_quality_entity];
+    const display = states[config.display_entity];
     const filter = states[config.filter_entity];
     const ioniser = states[config.ioniser_entity];
     const uv = states[config.uv_entity];
-    const snapshot = [fan, pm25, filter, ioniser, uv, locale];
+    const snapshot = [fan, pm25, quality, display, filter, ioniser, uv, locale];
     if (this.snapshot?.every((value, index) => value === snapshot[index])) return;
     this.snapshot = snapshot;
     const focused = this.shadowRoot.activeElement?.dataset.focusKey;
@@ -182,101 +227,138 @@ class AirDeckCard extends HTMLElement {
     if (on && this.wasOn === false && Number.isFinite(pmReading)) this.pmBaseline = pmReading;
     this.wasOn = usable ? on : undefined;
     const heading = element('div', 'header');
-    const badge = element('span', 'badge');
-    badge.append(icon('mdi:air-purifier'));
+    const badge = element('span', on ? 'badge running' : 'badge');
+    const mode = attrs.preset_mode?.toLowerCase();
+    const speed = attrs.percentage;
+    const speeds = speedSettings(attrs);
+    const namedLevel = namedSpeeds.indexOf(mode) + 1;
+    const level = namedLevel || (Number.isFinite(speed) && speed > 0 ? Math.max(1, Math.round(speed * speeds.count / 100)) : 0);
+    const spin = mode === 'sleep' || mode === 'night' ? 3 : namedLevel === 3 || speed >= 90
+      ? 0.7 : namedLevel === 2 || speed >= 60 ? 1.1 : 1.6;
+    badge.style.setProperty('--airdeck-spin', `${spin}s`);
+    badge.append(icon('mdi:fan'));
     const title = element('div', 'title');
-    title.append(element('strong', '', attrs.friendly_name ?? 'Air purifier'));
+    title.append(element('strong', '', attrs.friendly_name ?? 'Air Purifier'));
     const status = !fan ? 'Choose an air purifier in the card editor' : !usable ? 'Unavailable' : on ? 'On' : 'Off';
-    const details = on && usable ? [attrs.preset_mode, Number.isFinite(attrs.percentage) ? `${attrs.percentage}%` : ''] : [];
-    title.append(element('small', '', [status, ...details].filter(Boolean).join(' · ')));
+    const details = [status];
+    if (on && usable) {
+      if (namedLevel) details.push(`Speed ${namedLevel}`);
+      else if (attrs.preset_mode) details.push(modeLabel(attrs.preset_mode));
+      else if ((supported & features.speed) && level) details.push(speeds.count <= 5 ? `Speed ${level}` : `${speed}%`);
+    }
+    const format = state => available(state) ? this.homeAssistant.formatEntityState?.(state)
+      ?? [state.state, state.attributes.unit_of_measurement].filter(Boolean).join(' ') : 'Unavailable';
+    if (config.show_filter !== false && config.filter_entity) details.push(`Filter ${format(filter)}`);
+    if (config.show_display !== false && config.display_entity) {
+      details.push(`Display ${available(display) ? modeLabel(display.state) : 'Unavailable'}`);
+    }
+    title.append(element('small', '', details.join(' · ')));
     heading.append(badge, title);
+    const content = [heading];
+    const strip = element('div', 'strip');
+    strip.setAttribute('role', 'group');
+    strip.setAttribute('aria-label', 'Air purifier controls');
+
     if (config.show_power !== false && (supported & (features.on | features.off))) {
-      const power = this.button('', () => runFan(on ? 'turn_off' : 'turn_on'), on, !usable || !powerSupported);
-      power.className = 'power';
+      const power = this.iconButton(on ? 'Turn off air purifier' : 'Turn on air purifier', 'mdi:power',
+        () => runFan(on ? 'turn_off' : 'turn_on'), on, !usable || !powerSupported);
+      power.classList.add('power');
       power.dataset.focusKey = 'power';
-      power.setAttribute('aria-label', on ? 'Turn off air purifier' : 'Turn on air purifier');
-      power.append(icon('mdi:power'));
-      heading.append(power);
+      strip.append(power);
     }
 
-    const content = [heading];
-    if (config.show_speed !== false && supported & features.speed) {
-      const { count, percentage } = speedSettings(attrs);
-      const speed = attrs.percentage;
-      if (count <= 5) {
-        const buttons = Array.from({ length: count }, (_, index) => {
-          const value = percentage(index + 1);
-          const button = this.button(String(index + 1), () => runFan('set_percentage', { percentage: value }),
-            on && !attrs.preset_mode && Math.abs(speed - value) <= 1, !usable);
-          button.dataset.focusKey = `speed-${index}`;
-          button.setAttribute('aria-label', `Speed ${index + 1}, ${value}%`);
-          return button;
-        });
-        content.push(this.section('Speed', buttons));
-      } else {
-        const slider = element('div', 'slider');
-        const range = element('input');
-        range.type = 'range';
-        range.min = '1';
-        range.max = String(count);
-        range.value = String(Math.max(1, Math.round((speed || 0) * count / 100)));
-        range.disabled = !usable;
-        range.dataset.focusKey = 'speed-slider';
-        range.setAttribute('aria-label', 'Fan speed');
-        const reading = element('small', '', `${speed || 0}%`);
-        range.setAttribute('aria-valuetext', reading.textContent);
-        range.addEventListener('input', () => {
-          reading.textContent = `${percentage(Number(range.value))}%`;
+    const presets = (supported & features.preset) && Array.isArray(attrs.preset_modes)
+      ? attrs.preset_modes.filter(value => typeof value === 'string' && value.trim()) : [];
+    const manual = presets.filter(preset => namedSpeeds.includes(preset.toLowerCase()))
+      .sort((a, b) => namedSpeeds.indexOf(a.toLowerCase()) - namedSpeeds.indexOf(b.toLowerCase()));
+    const automatic = presets.filter(preset => ['auto', 'automatic', 'smart'].includes(preset.toLowerCase()));
+    const other = presets.filter(preset => !manual.includes(preset) && !automatic.includes(preset));
+    const appendPreset = preset => {
+      const key = preset.toLowerCase();
+      const index = namedSpeeds.indexOf(key) + 1;
+      const button = this.iconButton(index ? `Speed ${index}` : modeLabel(preset),
+        index ? `mdi:fan-speed-${index}` : presetIcons.get(key) ?? 'mdi:tune-variant',
+        () => runFan('set_preset_mode', { preset_mode: preset }), on && attrs.preset_mode === preset, !usable);
+      button.dataset.focusKey = `preset-${presets.indexOf(preset)}`;
+      strip.append(button);
+    };
+    if (config.show_presets !== false) automatic.forEach(appendPreset);
+    let slider;
+    if (config.show_speed !== false) {
+      if (manual.length) {
+        manual.forEach(appendPreset);
+      } else if (supported & features.speed) {
+        if (speeds.count <= 5) {
+          for (let index = 1; index <= speeds.count; index++) {
+            const value = speeds.percentage(index);
+            const button = this.iconButton(`Speed ${index}, ${value}%`, index <= 3 ? `mdi:fan-speed-${index}` : 'mdi:fan',
+              () => runFan('set_percentage', { percentage: value }),
+              on && !attrs.preset_mode && level === index, !usable);
+            button.dataset.focusKey = `speed-${index - 1}`;
+            if (index > 3) {
+              const speedLabel = element('span', 'speed-label');
+              speedLabel.append(icon('mdi:fan'), element('span', '', String(index)));
+              button.replaceChildren(speedLabel);
+            }
+            strip.append(button);
+          }
+        } else {
+          slider = element('div', 'slider');
+          const range = element('input');
+          range.type = 'range';
+          range.min = '1';
+          range.max = String(speeds.count);
+          range.value = String(Math.max(1, level));
+          range.disabled = !usable;
+          range.dataset.focusKey = 'speed-slider';
+          range.setAttribute('aria-label', 'Fan speed');
+          const reading = element('small', '', `${speed || 0}%`);
           range.setAttribute('aria-valuetext', reading.textContent);
-        });
-        range.addEventListener('change', () => runFan('set_percentage', { percentage: percentage(Number(range.value)) }));
-        slider.append(range, reading);
-        content.push(this.section('Speed', [slider]));
+          range.addEventListener('input', () => {
+            reading.textContent = `${speeds.percentage(Number(range.value))}%`;
+            range.setAttribute('aria-valuetext', reading.textContent);
+          });
+          range.addEventListener('change', () => runFan('set_percentage', { percentage: speeds.percentage(Number(range.value)) }));
+          slider.append(icon('mdi:fan'), range, reading);
+        }
       }
     }
+    if (config.show_presets !== false) other.forEach(appendPreset);
+    if (strip.childElementCount) content.push(strip);
+    if (slider) content.push(slider);
 
-    const presets = attrs.preset_modes;
-    if (config.show_presets !== false && supported & features.preset && Array.isArray(presets) && presets.length) {
-      const buttons = presets.map((preset, index) => {
-        const label = preset.replaceAll('_', ' ').replace(/^./, first => first.toUpperCase());
-        const button = this.button(label, () => runFan('set_preset_mode', { preset_mode: preset }),
-          on && attrs.preset_mode === preset, !usable);
-        button.dataset.focusKey = `preset-${index}`;
-        return button;
-      });
-      content.push(this.section('Mode', buttons));
+    const metrics = element('div', 'tiles');
+    if (config.show_air_quality !== false && config.air_quality_entity) {
+      const tile = this.tile('Air Quality', format(quality), 'mdi:air-filter');
+      tile.className = 'tile metric';
+      metrics.append(tile);
     }
-
-    const metrics = element('div', 'metrics');
-    for (const [key, label, state] of [['air_quality', 'PM2.5', pm25], ['filter', 'Filter', filter]]) {
-      const entityId = key === 'air_quality' ? config.pm25_entity : config.filter_entity;
-      if (config[`show_${key}`] === false || !entityId) continue;
-      const value = available(state) ? this.homeAssistant.formatEntityState?.(state)
-        ?? [state.state, state.attributes.unit_of_measurement].filter(Boolean).join(' ') : 'Unavailable';
-      const metric = element('div', 'metric');
-      metric.append(element('small', '', label), element('strong', '', value));
-      if (key === 'air_quality' && this.pmBaseline !== undefined && Number.isFinite(pmReading)) {
+    if (config.show_air_quality !== false && config.pm25_entity) {
+      let value = format(pm25);
+      if (this.pmBaseline !== undefined && Number.isFinite(pmReading)) {
         const change = new Intl.NumberFormat(locale?.language, { signDisplay: 'exceptZero', maximumFractionDigits: 1 })
           .format(pmReading - this.pmBaseline);
-        const unit = state.attributes.unit_of_measurement;
-        metric.append(element('small', '', `${[change, unit].filter(Boolean).join(' ')} this run`));
+        value += ` · ${change} this run`;
       }
-      metrics.append(metric);
+      const tile = this.tile('PM2.5', value, 'mdi:blur');
+      tile.className = 'tile metric';
+      metrics.append(tile);
     }
     if (metrics.childElementCount) content.push(metrics);
 
-    const extras = element('div', 'extras');
+    const extras = element('div', 'tiles');
     for (const { key, label, icon: iconName } of extraControls) {
       const entityId = config[`${key}_entity`];
       if (!entityId || config[`show_${key}`] === false) continue;
       const state = states[entityId];
       const script = entityId.startsWith('script.');
-      const button = this.button(label, () => this.run(script ? 'script' : 'switch',
+      const value = !available(state) ? 'Unavailable' : script ? 'Run' : modeLabel(state.state);
+      const button = this.button('', () => this.run(script ? 'script' : 'switch',
         script ? 'turn_on' : 'toggle', entityId), script ? undefined : state?.state === 'on', !available(state));
-      button.className = 'option';
+      button.className = `tile ${key}`;
       button.dataset.focusKey = key;
-      button.prepend(icon(iconName));
-      extras.append(button);
+      button.setAttribute('aria-label', label);
+      extras.append(this.tile(label, value, iconName, button));
     }
     if (extras.childElementCount) content.push(extras);
     if (this.error) {
