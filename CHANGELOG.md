@@ -2,6 +2,13 @@
 
 Write a “What’s new” section in British English for every release.
 
+## 1.1.1
+
+### What’s new
+
+- Match the fan and control icons in the original purifier dashboard and the light and dark previews.
+- Keep the fan icon spinning while the purifier runs, including when its sensors update.
+
 ## 1.1.0
 
 ### What’s new
