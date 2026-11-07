@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/szbence7/airdeck-air-purifier-card)](https://github.com/szbence7/airdeck-air-purifier-card/releases)
 <a href="https://www.buymeacoffee.com/benceix"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="24" alt="Buy Me a Coffee"></a>
 
-AirDeck is a Home Assistant air purifier dashboard card for devices exposed as a `fan` entity. Choose your purifier in the visual editor. AirDeck adapts to the speed controls and operating modes the device reports. You can add separate PM2.5 and filter sensors, plus UV and ioniser controls.
+AirDeck is a Home Assistant air purifier dashboard card for devices exposed as a `fan` entity. Choose your purifier in the visual editor. AirDeck adapts to the speed controls and operating modes the device reports. You can add separate air-quality, PM2.5 and filter sensors, plus display status, UV and ioniser controls.
 
 | Dark mode | Light mode |
 | --- | --- |
@@ -19,7 +19,7 @@ AirDeck is a Home Assistant air purifier dashboard card for devices exposed as a
 
 ## Configure
 
-Choose a `fan` entity first. The card shows a power button where supported, speed buttons for up to five speeds and a slider for more speeds. Operating modes come from the entity, so Auto and Sleep appear when your purifier provides them. Features absent from the integration are omitted.
+Choose a `fan` entity first. The card shows a power button where supported, icon buttons for named Low, Medium and High presets or up to five percentage speeds, and a slider for more percentage speeds. The fan icon spins while the purifier is running. Operating modes come from the entity, so Auto and Sleep appear when your purifier provides them. Features absent from the integration are omitted.
 
 Each section can be hidden independently. The sensors, UV and ioniser are optional. A switch shows its current state and toggles when pressed. A script runs once per press, so choose a toggle script if you want one button to handle both directions.
 
@@ -30,9 +30,12 @@ show_power: true
 show_speed: true
 show_presets: true
 show_air_quality: true
+air_quality_entity: sensor.living_room_air_quality
 pm25_entity: sensor.living_room_pm25
 show_filter: true
 filter_entity: sensor.purifier_filter_life
+show_display: true
+display_entity: light.purifier_display
 show_ioniser: true
 ioniser_entity: switch.purifier_ioniser
 show_uv: true
